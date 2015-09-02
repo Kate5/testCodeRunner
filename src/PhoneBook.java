@@ -8,6 +8,17 @@ public class PhoneBook
   private String objectId;
   private Contact owner;
   private List<Contact> contacts;
+  private String property;
+
+  public String getProperty()
+  {
+    return property;
+  }
+
+  public void setProperty( String property )
+  {
+    this.property = property;
+  }
 
   public String getObjectId()
   {
