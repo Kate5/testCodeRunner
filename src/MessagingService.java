@@ -1,10 +1,16 @@
 import com.backendless.Backendless;
+import com.backendless.DeviceRegistration;
+import com.backendless.Subscription;
+import com.backendless.async.callback.AsyncCallback;
+import com.backendless.exceptions.BackendlessFault;
 import com.backendless.messaging.*;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by backendlessdev on 8/31/15.
@@ -22,28 +28,27 @@ public class MessagingService
   public void testSubscribe() throws Throwable
   {
 
-//    AsyncCallback<List<Message>> subscriptionResponder = new AsyncCallback<List<Message>>()
-//    {
-//      public void handleResponse( List<Message> response )
-//      {
-//      }
-//      public void handleFault( BackendlessFault fault )
-//      {
-//      }
-//    });
+    AsyncCallback<List<Message>> subscriptionResponder = new AsyncCallback<List<Message>>()
+    {
+      public void handleResponse( List<Message> response )
+      {
+      }
 
+      public void handleFault( BackendlessFault fault )
+      {
+      }
+    };
 
     SubscriptionOptions subscriptionOptions = new SubscriptionOptions();
     subscriptionOptions.setSelector( "city='Tokyo'" );
 
-   // Backendless.Messaging.subscribe( subscriptionResponder, subscriptionOptions );
-
+    Subscription subscription = Backendless.Messaging.subscribe( subscriptionResponder, subscriptionOptions );
+    System.out.println( subscription.getChannelName().toString() );
   }
 
   @Test
   public void testPoll() throws Throwable
   {
-
 
 
   }
@@ -52,16 +57,30 @@ public class MessagingService
   public void testCancel() throws Throwable
   {
 
+//    try
+//    {
+//      Backendless.Messaging.unregisterDevice();
+//    }
+//    catch( BackendlessException exception )
+//    {
+//      // either device is not registered or an error occurred during de-registration
+//    }
 
+    DeliveryOptions deliveryOptions = new DeliveryOptions();
+    Date publishDate = new Date( System.currentTimeMillis() + 20000 ); // add 20 seconds
+    deliveryOptions.setPublishAt( publishDate );
+
+    MessageStatus status = Backendless.Messaging.publish( "Test Message", null, deliveryOptions );
+    boolean result = Backendless.Messaging.cancel( status.getMessageId() );
+    System.out.println( result );
+    Assert.assertTrue( result );
   }
 
   @Test
   public void testDeviceRegistration() throws Throwable
   {
 
-
-
-
+    DeviceRegistration devReg = Backendless.Messaging.getRegistrations();
   }
 
   @Test
@@ -83,24 +102,22 @@ public class MessagingService
     publishOptions1.setSubtopic( "news" );
     PhoneBook test = new PhoneBook();
 
-    HashMap<Object , Object> test2 = new HashMap<Object, Object>(  );
+    HashMap<Object, Object> test2 = new HashMap<Object, Object>();
     test2.put( "1", "1" );
 
-    MessageStatus status2 = Backendless.Messaging.publish( (Object) test2 , publishOptions1 );
+    MessageStatus status2 = Backendless.Messaging.publish( (Object) test2, publishOptions1 );
     System.out.println( status2 );
 
     DeliveryOptions deliveryOptions3 = new DeliveryOptions();
-    deliveryOptions3.setPushPolicy( PushPolicyEnum.ALSO );
-    deliveryOptions3.setPushBroadcast( 1 );
+    deliveryOptions3.setPushPolicy( PushPolicyEnum.ONLY );
+    deliveryOptions3.setPushBroadcast( PushBroadcastMask.ALL );
     MessageStatus status4 = Backendless.Messaging.publish( "Hi Devices!", null, deliveryOptions3 );
     System.out.println( status4 );
-
-
-
   }
 
   @Test
-  public void testPublish2() throws Throwable {
+  public void testPublish2() throws Throwable
+  {
 
     DeliveryOptions deliveryOptions = new DeliveryOptions();
     deliveryOptions.setPushPolicy( PushPolicyEnum.ALSO );
@@ -125,14 +142,11 @@ public class MessagingService
 
     MessageStatus status2 = Backendless.Messaging.publish( "this is a private message!", publishOptions1, deliveryOptions1 );
     System.out.println( status2 );
-
-
-
-
   }
 
   @Test
-  public void testPublish3() throws Throwable {
+  public void testPublish3() throws Throwable
+  {
 
     DeliveryOptions deliveryOptions = new DeliveryOptions();
     Date publishDate = new Date( System.currentTimeMillis() + 20000 ); // add 20 seconds
@@ -147,7 +161,5 @@ public class MessagingService
 
     MessageStatus status1 = Backendless.Messaging.publish( "This message was scheduled 20 sec ago", null, deliveryOptions );
     System.out.println( status1 );
-
   }
-
 }
